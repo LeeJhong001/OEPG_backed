@@ -1,0 +1,35 @@
+# JWT 配置
+jwt:
+  secret: sk_example_0dc889d3fcdc46feb6b3a9e6a6c8b1d7a2f4c8e9b0d1f2e3a4c5d6e7f8a9b0c
+  expiration: 86400000  # 24小时，单位：毫秒
+
+# 数据库配置
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/oepg?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+# 服务器配置
+server:
+  port: 8081
+
+# 日志配置
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.example.oepg: DEBUG
