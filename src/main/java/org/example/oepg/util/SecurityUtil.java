@@ -4,7 +4,6 @@ package org.example.oepg.util;
 import org.example.oepg.enums.UserRole;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * 安全工具类
