@@ -1,13 +1,11 @@
 package org.example.oepg.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.oepg.dto.req.QuestionRequest;
 import org.example.oepg.dto.res.QuestionResponse;
 import org.example.oepg.entity.Question;
 import org.example.oepg.entity.User;
-import org.example.oepg.enums.UserRole;
 import org.example.oepg.repository.QuestionRepository;
 import org.example.oepg.repository.UserRepository;
 import org.example.oepg.service.QuestionService;

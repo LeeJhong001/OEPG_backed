@@ -5,7 +5,6 @@ import org.example.oepg.dto.req.CategoryRequest;
 import org.example.oepg.dto.res.CategoryResponse;
 import org.example.oepg.entity.QuestionCategory;
 import org.example.oepg.entity.User;
-import org.example.oepg.enums.UserRole;
 import org.example.oepg.repository.QuestionCategoryRepository;
 import org.example.oepg.repository.QuestionRepository;
 import org.example.oepg.repository.UserRepository;
