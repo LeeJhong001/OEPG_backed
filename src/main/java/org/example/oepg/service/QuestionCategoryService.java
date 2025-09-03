@@ -46,12 +46,17 @@ public interface QuestionCategoryService {
     List<CategoryResponse> getCategoriesByParentId(Long parentId);
     
     /**
-     * 获取顶级分类
+     * 获取分类统计信息
      */
-    List<CategoryResponse> getTopLevelCategories();
+    Object getCategoryStatistics(Long categoryId);
     
     /**
      * 检查分类是否可以删除
      */
     boolean canDeleteCategory(Long id);
+    
+    /**
+     * 获取顶级分类（父分类ID为null的分类）
+     */
+    List<CategoryResponse> getTopLevelCategories();
 } 

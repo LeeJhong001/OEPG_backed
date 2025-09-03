@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.example.oepg.util.SecurityUtil;
+import org.example.oepg.service.QuestionFavoriteService;
+import org.example.oepg.service.QuestionTagService;
 
 /**
  * 教师端题库管理控制器
@@ -26,6 +29,12 @@ public class TeacherQuestionController {
 
     @Autowired
     private QuestionService questionService;
+    
+    @Autowired
+    private QuestionFavoriteService questionFavoriteService;
+    
+    @Autowired
+    private QuestionTagService questionTagService;
 
     /**
      * 创建题目
@@ -113,7 +122,7 @@ public class TeacherQuestionController {
     @GetMapping("/my-questions")
     public ResponseEntity<List<QuestionResponse>> getMyQuestions() {
         try {
-            Long currentUserId = 1L; // TODO: 从安全上下文获取
+            Long currentUserId = SecurityUtil.getCurrentUserId();
             List<QuestionResponse> questions = questionService.getQuestionsByCreator(currentUserId);
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
@@ -347,7 +356,8 @@ public class TeacherQuestionController {
     @PostMapping("/{id}/favorite")
     public ResponseEntity<Void> toggleQuestionFavorite(@PathVariable Long id) {
         try {
-            // TODO: 实现题目收藏功能
+            Long currentUserId = SecurityUtil.getCurrentUserId();
+            questionFavoriteService.toggleFavorite(currentUserId, id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -360,8 +370,9 @@ public class TeacherQuestionController {
     @GetMapping("/favorites")
     public ResponseEntity<List<QuestionResponse>> getFavoriteQuestions() {
         try {
-            // TODO: 实现获取收藏题目功能
-            return ResponseEntity.ok(new ArrayList<>());
+            Long currentUserId = SecurityUtil.getCurrentUserId();
+            List<QuestionResponse> favoriteQuestions = questionFavoriteService.getFavoriteQuestions(currentUserId);
+            return ResponseEntity.ok(favoriteQuestions);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -374,7 +385,7 @@ public class TeacherQuestionController {
     public ResponseEntity<Void> updateQuestionTags(@PathVariable Long id,
                                                    @RequestBody List<String> tags) {
         try {
-            // TODO: 实现题目标签功能
+            questionTagService.updateQuestionTags(id, tags);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -387,8 +398,8 @@ public class TeacherQuestionController {
     @GetMapping("/tags/{tag}")
     public ResponseEntity<List<QuestionResponse>> getQuestionsByTag(@PathVariable String tag) {
         try {
-            // TODO: 实现根据标签获取题目功能
-            return ResponseEntity.ok(new ArrayList<>());
+            List<QuestionResponse> questions = questionTagService.getQuestionsByTag(tag);
+            return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

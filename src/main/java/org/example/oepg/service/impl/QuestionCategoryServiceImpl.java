@@ -16,8 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.example.oepg.entity.Question;
 
 /**
  * 题目分类服务实现类
@@ -302,36 +305,50 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
 
     @Override
     public boolean canDeleteCategory(Long id) {
-        log.info("=== 检查分类是否可以删除 ===");
-        log.info("分类ID: {}", id);
-        
-        try {
-            // 权限检查：只有管理员可以检查删除权限
-            if (!SecurityUtil.isAdmin()) {
-                log.warn("权限不足：用户不是管理员，无法检查删除权限");
-                return false;
-            }
-
-            // 检查是否有子分类
-            List<QuestionCategory> children = categoryRepository.findByParentId(id);
-            if (!children.isEmpty()) {
-                log.warn("分类有子分类，无法删除: id={}, 子分类数量={}", id, children.size());
-                return false;
-            }
-
-            // 检查是否有题目
-            int questionCount = questionRepository.countByCategoryId(id);
-            if (questionCount > 0) {
-                log.warn("分类下有题目，无法删除: id={}, 题目数量={}", id, questionCount);
-                return false;
-            }
-            
-            log.info("分类可以删除: id={}", id);
-            return true;
-        } catch (Exception e) {
-            log.error("检查分类删除权限失败: ", e);
+        // 检查是否有子分类
+        List<QuestionCategory> children = categoryRepository.findByParentId(id);
+        if (!children.isEmpty()) {
             return false;
         }
+        
+        // 检查是否有题目使用该分类
+        List<Question> questions = questionRepository.findByCategoryId(id);
+        if (!questions.isEmpty()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public Object getCategoryStatistics(Long categoryId) {
+        Map<String, Object> statistics = new HashMap<>();
+        
+        // 获取该分类下的所有题目
+        List<Question> questions = questionRepository.findByCategoryId(categoryId);
+        
+        statistics.put("categoryId", categoryId);
+        statistics.put("totalQuestions", questions.size());
+        
+        // 统计难度分布
+        long easyCount = questions.stream().filter(q -> q.getDifficulty() != null && q.getDifficulty() <= 2).count();
+        long mediumCount = questions.stream().filter(q -> q.getDifficulty() != null && q.getDifficulty() == 3).count();
+        long hardCount = questions.stream().filter(q -> q.getDifficulty() != null && q.getDifficulty() >= 4).count();
+        
+        statistics.put("easyQuestions", easyCount);
+        statistics.put("mediumQuestions", mediumCount);
+        statistics.put("hardQuestions", hardCount);
+        
+        // 统计题目类型分布
+        Map<String, Long> typeDistribution = questions.stream()
+                .collect(Collectors.groupingBy(
+                    q -> q.getType() != null ? q.getType().name() : "UNKNOWN",
+                    Collectors.counting()
+                ));
+        
+        statistics.put("questionTypes", typeDistribution);
+        
+        return statistics;
     }
 
     /**

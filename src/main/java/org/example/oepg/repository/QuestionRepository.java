@@ -116,4 +116,10 @@ public interface QuestionRepository extends BaseMapper<Question> {
             "WHERE title LIKE CONCAT('%', #{keyword}, '%') " +
             "LIMIT 10")
     List<String> getSearchSuggestions(@Param("keyword") String keyword);
-} 
+    
+    /**
+     * 根据分类ID查找题目
+     */
+    @Select("SELECT * FROM questions WHERE category_id = #{categoryId} ORDER BY created_at DESC")
+    List<Question> findByCategoryId(@Param("categoryId") Long categoryId);
+}

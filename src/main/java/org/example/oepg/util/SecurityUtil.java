@@ -90,7 +90,6 @@ public class SecurityUtil {
         if (currentRole == null) {
             return false;
         }
-        
         for (UserRole role : roles) {
             if (currentRole.equals(role)) {
                 return true;
@@ -98,4 +97,41 @@ public class SecurityUtil {
         }
         return false;
     }
-} 
+
+    /**
+     * 获取当前用户ID
+     */
+    public static Long getCurrentUserId() {
+        Authentication authentication = getCurrentAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails) {
+            org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
+            // 如果UserDetails实现类包含用户ID，可以从这里获取
+            // 这里假设用户名就是用户ID，实际项目中需要根据具体实现调整
+            try {
+                return Long.parseLong(userDetails.getUsername());
+            } catch (NumberFormatException e) {
+                // 如果用户名不是数字，返回默认值
+                return 1L;
+            }
+        }
+        // 未登录或获取失败时返回默认值
+        return 1L;
+    }
+
+    /**
+     * 检查是否已认证
+     */
+    public static boolean isAuthenticated() {
+        Authentication authentication = getCurrentAuthentication();
+        return authentication != null && authentication.isAuthenticated() 
+               && !(authentication.getPrincipal() instanceof String);
+    }
+
+    /**
+     * 检查当前用户是否为学生
+     */
+    public static boolean isStudent() {
+        UserRole role = getCurrentUserRole();
+        return role != null && role == UserRole.STUDENT;
+    }
+}

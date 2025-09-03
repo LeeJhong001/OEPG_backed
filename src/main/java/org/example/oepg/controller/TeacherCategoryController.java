@@ -236,16 +236,8 @@ public class TeacherCategoryController {
     @GetMapping("/{id}/statistics")
     public ResponseEntity<Object> getCategoryStatistics(@PathVariable Long id) {
         try {
-            // TODO: 实现分类统计逻辑
-            // 统计该分类下的题目数量、难度分布等
-            Map<String, Object> response = new HashMap<>();
-            response.put("categoryId", id);
-            response.put("totalQuestions", 0);
-            response.put("easyQuestions", 0);
-            response.put("mediumQuestions", 0);
-            response.put("hardQuestions", 0);
-            response.put("questionTypes", new HashMap<>());
-            return ResponseEntity.ok(response);
+            Object statistics = categoryService.getCategoryStatistics(id);
+            return ResponseEntity.ok(statistics);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
