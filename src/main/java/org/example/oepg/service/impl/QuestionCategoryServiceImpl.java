@@ -5,6 +5,7 @@ import org.example.oepg.dto.req.CategoryRequest;
 import org.example.oepg.dto.res.CategoryResponse;
 import org.example.oepg.entity.QuestionCategory;
 import org.example.oepg.entity.User;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.QuestionCategoryRepository;
 import org.example.oepg.repository.QuestionRepository;
 import org.example.oepg.repository.UserRepository;
@@ -48,7 +49,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：只有教师和管理员可以创建分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以创建分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以创建分类");
             }
 
             // 从认证信息中获取用户ID
@@ -107,7 +108,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             if (!SecurityUtil.isAdmin()) {
                 if (!SecurityUtil.isTeacher()) {
                     log.error("权限不足：用户不是教师或管理员");
-                    throw new RuntimeException("权限不足：只有教师和管理员可以编辑分类");
+                    throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以编辑分类");
                 }
                 // 这里可以添加创建者检查，如果分类有创建者字段的话
                 // 目前暂时允许教师编辑所有分类
@@ -147,7 +148,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：只有管理员可以删除分类
             if (!SecurityUtil.isAdmin()) {
                 log.error("权限不足：用户不是管理员");
-                throw new RuntimeException("权限不足：只有管理员可以删除分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有管理员可以删除分类");
             }
 
             if (!canDeleteCategory(id)) {
@@ -173,7 +174,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：教师和管理员可以查看分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以查看分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看分类");
             }
 
             QuestionCategory category = categoryRepository.selectById(id);
@@ -198,7 +199,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：教师和管理员可以查看分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以查看分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看分类");
             }
 
             log.info("1. 查询所有分类（包括禁用的）...");
@@ -228,7 +229,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：教师和管理员可以查看分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以查看分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看分类");
             }
 
             log.info("1. 查询所有启用的分类...");
@@ -259,7 +260,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：教师和管理员可以查看分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以查看分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看分类");
             }
 
             List<QuestionCategory> categories = categoryRepository.findByParentId(parentId);
@@ -284,7 +285,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             // 权限检查：教师和管理员可以查看分类
             if (!SecurityUtil.isTeacherOrAdmin()) {
                 log.error("权限不足：用户不是教师或管理员");
-                throw new RuntimeException("权限不足：只有教师和管理员可以查看分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看分类");
             }
 
             log.info("1. 查询顶级分类（包括禁用的）...");
