@@ -8,6 +8,7 @@ import org.example.oepg.dto.res.ExamPaperResponse;
 import org.example.oepg.entity.ExamPaper;
 import org.example.oepg.entity.PaperQuestion;
 import org.example.oepg.entity.Question;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.ExamPaperRepository;
 import org.example.oepg.repository.PaperQuestionRepository;
 import org.example.oepg.repository.QuestionRepository;
@@ -99,12 +100,12 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse updateExamPaper(Long id, ExamPaperRequest request) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 验证权限
         if (!examPaper.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限修改此试卷");
+            throw new BusinessException("PERMISSION_DENIED", "无权限修改此试卷");
         }
 
         examPaper.setTitle(request.getTitle());
@@ -120,17 +121,17 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public void deleteExamPaper(Long id) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 验证权限
         if (!examPaper.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限删除此试卷");
+            throw new BusinessException("PERMISSION_DENIED", "无权限删除此试卷");
         }
 
         // 检查试卷状态
         if (examPaper.getStatus() == ExamPaper.PaperStatus.PUBLISHED) {
-            throw new RuntimeException("已发布的试卷不能删除");
+            throw new BusinessException("INVALID_OPERATION", "已发布的试卷不能删除");
         }
 
         // 删除试卷关联的题目
@@ -144,7 +145,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse getExamPaperById(Long id) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
         return convertToResponse(examPaper);
     }
@@ -196,23 +197,23 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse publishExamPaper(Long id) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 验证权限
         if (!examPaper.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限发布此试卷");
+            throw new BusinessException("PERMISSION_DENIED", "无权限发布此试卷");
         }
 
         // 验证试卷状态
         if (examPaper.getStatus() != ExamPaper.PaperStatus.DRAFT) {
-            throw new RuntimeException("只有草稿状态的试卷可以发布");
+            throw new BusinessException("INVALID_OPERATION", "只有草稿状态的试卷可以发布");
         }
 
         // 验证试卷是否有题目
         List<PaperQuestion> questions = paperQuestionRepository.findByPaperId(id);
         if (questions.isEmpty()) {
-            throw new RuntimeException("试卷没有题目，无法发布");
+            throw new BusinessException("INVALID_OPERATION", "试卷没有题目，无法发布");
         }
 
         examPaper.setStatus(ExamPaper.PaperStatus.PUBLISHED);
@@ -224,12 +225,12 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse archiveExamPaper(Long id) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 验证权限
         if (!examPaper.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限归档此试卷");
+            throw new BusinessException("PERMISSION_DENIED", "无权限归档此试卷");
         }
 
         examPaper.setStatus(ExamPaper.PaperStatus.ARCHIVED);
@@ -241,7 +242,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse copyExamPaper(Long id) {
         ExamPaper originalPaper = examPaperRepository.selectById(id);
         if (originalPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 复制试卷
@@ -276,7 +277,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaperResponse previewExamPaper(Long id) {
         ExamPaper examPaper = examPaperRepository.selectById(id);
         if (examPaper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         ExamPaperResponse response = convertToResponse(examPaper);
@@ -311,20 +312,20 @@ public class ExamPaperServiceImpl implements ExamPaperService {
         // 检查试卷是否存在
         ExamPaper paper = examPaperRepository.selectById(paperId);
         if (paper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         // 检查题目是否存在
         Question question = questionRepository.selectById(questionId);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         // 检查题目是否已在试卷中
         QueryWrapper<PaperQuestion> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("paper_id", paperId).eq("question_id", questionId);
         if (paperQuestionRepository.selectOne(queryWrapper) != null) {
-            throw new RuntimeException("题目已在试卷中");
+            throw new BusinessException("DUPLICATE_QUESTION", "题目已在试卷中");
         }
 
         PaperQuestion paperQuestion = PaperQuestion.builder()
@@ -380,7 +381,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public Object getPaperStatistics(Long paperId) {
         ExamPaper paper = examPaperRepository.selectById(paperId);
         if (paper == null) {
-            throw new RuntimeException("试卷不存在");
+            throw new BusinessException("EXAM_PAPER_NOT_FOUND", "试卷不存在");
         }
 
         List<PaperQuestion> questions = paperQuestionRepository.findByPaperId(paperId);

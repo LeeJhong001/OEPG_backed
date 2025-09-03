@@ -12,6 +12,7 @@ import org.example.oepg.dto.res.UserInfoResponse;
 import org.example.oepg.dto.res.UserListResponse;
 import org.example.oepg.entity.User;
 import org.example.oepg.enums.UserRole;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.UserRepository;
 import org.example.oepg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,12 @@ public class UserServiceImpl implements UserService {
     public User registerUser(RegisterRequest registerRequest) {
         // 检查用户名是否已存在
         if (existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("用户名已存在");
+            throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
         }
 
         // 检查邮箱是否已存在
         if (existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("邮箱已存在");
+            throw new BusinessException("EMAIL_EXISTS", "邮箱已存在");
         }
 
         // 创建新用户
@@ -95,12 +96,12 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserCreateRequest createRequest) {
         // 检查用户名是否已存在
         if (existsByUsername(createRequest.getUsername())) {
-            throw new RuntimeException("用户名已存在");
+            throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
         }
 
         // 检查邮箱是否已存在
         if (existsByEmail(createRequest.getEmail())) {
-            throw new RuntimeException("邮箱已存在");
+            throw new BusinessException("EMAIL_EXISTS", "邮箱已存在");
         }
 
         // 创建新用户
@@ -126,7 +127,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = userRepository.selectById(id);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("USER_NOT_FOUND", "用户不存在");
         }
         return user;
     }
@@ -140,7 +141,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.hasText(updateRequest.getUsername()) && 
             !updateRequest.getUsername().equals(existingUser.getUsername())) {
             if (userRepository.existsByUsernameAndNotId(updateRequest.getUsername(), id)) {
-                throw new RuntimeException("用户名已被其他用户使用");
+                throw new BusinessException("USERNAME_EXISTS", "用户名已被其他用户使用");
             }
             existingUser.setUsername(updateRequest.getUsername());
         }
@@ -149,7 +150,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.hasText(updateRequest.getEmail()) && 
             !updateRequest.getEmail().equals(existingUser.getEmail())) {
             if (userRepository.existsByEmailAndNotId(updateRequest.getEmail(), id)) {
-                throw new RuntimeException("邮箱已被其他用户使用");
+                throw new BusinessException("EMAIL_EXISTS", "邮箱已被其他用户使用");
             }
             existingUser.setEmail(updateRequest.getEmail());
         }
@@ -187,7 +188,7 @@ public class UserServiceImpl implements UserService {
             queryWrapper.eq("role", user.getRole());
             long adminCount = userRepository.selectCount(queryWrapper);
             if (adminCount <= 1) {
-                throw new RuntimeException("无法删除系统唯一的管理员账户");
+                throw new BusinessException("CANNOT_DELETE_LAST_ADMIN", "无法删除系统唯一的管理员账户");
             }
         }
         
@@ -209,7 +210,7 @@ public class UserServiceImpl implements UserService {
                 queryWrapper.eq("role", user.getRole());
                 long adminCount = userRepository.selectCount(queryWrapper);
                 if (adminCount <= ids.length) {
-                    throw new RuntimeException("无法删除所有管理员账户，系统必须保留至少一个管理员");
+                    throw new BusinessException("CANNOT_DELETE_ALL_ADMINS", "无法删除所有管理员账户，系统必须保留至少一个管理员");
                 }
             }
         }
@@ -262,7 +263,7 @@ public class UserServiceImpl implements UserService {
                       .eq("status", User.UserStatus.ACTIVE);
             long activeAdminCount = userRepository.selectCount(queryWrapper);
             if (activeAdminCount <= 1) {
-                throw new RuntimeException("无法禁用系统唯一的激活管理员账户");
+                throw new BusinessException("CANNOT_DISABLE_LAST_ADMIN", "无法禁用系统唯一的激活管理员账户");
             }
         }
         

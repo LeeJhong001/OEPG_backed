@@ -2,6 +2,7 @@ package org.example.oepg.service.impl;
 
 import org.example.oepg.dto.res.QuestionResponse;
 import org.example.oepg.entity.QuestionTag;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.QuestionTagRepository;
 import org.example.oepg.service.QuestionTagService;
 import org.example.oepg.service.QuestionService;
@@ -27,6 +28,10 @@ public class QuestionTagServiceImpl implements QuestionTagService {
     @Override
     @Transactional
     public void updateQuestionTags(Long questionId, List<String> tags) {
+        if (questionId == null) {
+            throw new BusinessException("INVALID_PARAMETER", "题目ID不能为空");
+        }
+        
         // 删除原有标签
         tagRepository.deleteByQuestionId(questionId);
         
@@ -46,7 +51,11 @@ public class QuestionTagServiceImpl implements QuestionTagService {
 
     @Override
     public List<QuestionResponse> getQuestionsByTag(String tagName) {
-        List<Long> questionIds = tagRepository.findQuestionIdsByTagName(tagName);
+        if (tagName == null || tagName.trim().isEmpty()) {
+            throw new BusinessException("INVALID_PARAMETER", "标签名不能为空");
+        }
+        
+        List<Long> questionIds = tagRepository.findQuestionIdsByTagName(tagName.trim());
         return questionIds.stream()
                 .map(questionService::getQuestionById)
                 .collect(Collectors.toList());
@@ -54,6 +63,10 @@ public class QuestionTagServiceImpl implements QuestionTagService {
 
     @Override
     public List<String> getQuestionTags(Long questionId) {
+        if (questionId == null) {
+            throw new BusinessException("INVALID_PARAMETER", "题目ID不能为空");
+        }
+        
         return tagRepository.findTagNamesByQuestionId(questionId);
     }
 

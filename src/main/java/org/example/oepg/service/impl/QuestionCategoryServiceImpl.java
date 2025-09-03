@@ -56,19 +56,19 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             String username = SecurityUtil.getCurrentUsername();
             if (username == null) {
                 log.error("用户未认证");
-                throw new RuntimeException("用户未认证");
+                throw new BusinessException("AUTHENTICATION_REQUIRED", "用户未认证");
             }
             
             User user = userRepository.findByUsername(username);
             if (user == null) {
                 log.error("用户不存在: {}", username);
-                throw new RuntimeException("用户不存在");
+                throw new BusinessException("USER_NOT_FOUND", "用户不存在");
             }
 
             // 检查分类名称是否已存在（同级分类中）
             if (categoryRepository.existsByNameAndParentId(request.getName(), request.getParentId(), 0L)) {
                 log.error("同级分类中已存在相同名称的分类: name={}, parentId={}", request.getName(), request.getParentId());
-                throw new RuntimeException("同级分类中已存在相同名称的分类");
+                throw new BusinessException("CATEGORY_NAME_EXISTS", "同级分类中已存在相同名称的分类");
             }
 
             QuestionCategory category = QuestionCategory.builder()
@@ -118,7 +118,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             if (categoryRepository.existsByNameAndParentId(request.getName(), request.getParentId(), id)) {
                 log.error("同级分类中已存在相同名称的分类: name={}, parentId={}, excludeId={}", 
                         request.getName(), request.getParentId(), id);
-                throw new RuntimeException("同级分类中已存在相同名称的分类");
+                throw new BusinessException("CATEGORY_NAME_EXISTS", "同级分类中已存在相同名称的分类");
             }
 
             category.setName(request.getName());
@@ -153,7 +153,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
 
             if (!canDeleteCategory(id)) {
                 log.error("分类无法删除: id={}", id);
-                throw new RuntimeException("分类下存在题目或子分类，无法删除");
+                throw new BusinessException("CATEGORY_CANNOT_DELETE", "分类下存在题目或子分类，无法删除");
             }
 
             log.info("准备删除分类: id={}", id);
@@ -217,7 +217,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             return tree;
         } catch (Exception e) {
             log.error("获取分类树失败: ", e);
-            throw new RuntimeException("获取分类树失败", e);
+            throw new BusinessException("SYSTEM_ERROR", "获取分类树失败: " + e.getMessage());
         }
     }
 
@@ -247,7 +247,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             return tree;
         } catch (Exception e) {
             log.error("获取启用分类树失败: ", e);
-            throw new RuntimeException("获取启用分类树失败", e);
+            throw new BusinessException("SYSTEM_ERROR", "获取启用分类树失败: " + e.getMessage());
         }
     }
 
@@ -273,7 +273,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             return responses;
         } catch (Exception e) {
             log.error("获取子分类失败: ", e);
-            throw new RuntimeException("获取子分类失败", e);
+            throw new BusinessException("SYSTEM_ERROR", "获取子分类失败: " + e.getMessage());
         }
     }
 
@@ -300,7 +300,7 @@ public class QuestionCategoryServiceImpl implements QuestionCategoryService {
             return responses;
         } catch (Exception e) {
             log.error("获取顶级分类失败: ", e);
-            throw new RuntimeException("获取顶级分类失败", e);
+            throw new BusinessException("SYSTEM_ERROR", "获取顶级分类失败: " + e.getMessage());
         }
     }
 

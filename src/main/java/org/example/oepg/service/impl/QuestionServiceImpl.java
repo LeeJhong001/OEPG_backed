@@ -9,6 +9,7 @@ import org.example.oepg.dto.res.AnswerValidationResponse;
 import org.example.oepg.dto.res.QuestionUsageHistoryResponse;
 import org.example.oepg.entity.Question;
 import org.example.oepg.entity.User;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.QuestionRepository;
 import org.example.oepg.repository.UserRepository;
 import org.example.oepg.service.QuestionService;
@@ -38,18 +39,18 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionResponse createQuestion(QuestionRequest request) {
         // 权限检查：只有教师和管理员可以创建题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以创建题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以创建题目");
         }
 
         // 从认证信息中获取用户ID
         String username = SecurityUtil.getCurrentUsername();
         if (username == null) {
-            throw new RuntimeException("用户未认证");
+            throw new BusinessException("AUTHENTICATION_REQUIRED", "用户未认证");
         }
         
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("USER_NOT_FOUND", "用户不存在");
         }
 
         Question question = Question.builder()
@@ -75,13 +76,13 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionResponse updateQuestion(Long id, QuestionRequest request) {
         Question question = questionRepository.selectById(id);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         // 权限检查：管理员可以编辑所有题目，教师只能编辑自己创建的题目
         if (!SecurityUtil.isAdmin()) {
             if (!SecurityUtil.isTeacher()) {
-                throw new RuntimeException("权限不足：只有教师和管理员可以编辑题目");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以编辑题目");
             }
             
             // 检查是否是自己的题目
@@ -89,7 +90,7 @@ public class QuestionServiceImpl implements QuestionService {
             if (currentUsername != null) {
                 User currentUser = userRepository.findByUsername(currentUsername);
                 if (currentUser == null || !currentUser.getId().equals(question.getCreatedById())) {
-                    throw new RuntimeException("权限不足：只能编辑自己创建的题目");
+                    throw new BusinessException("PERMISSION_DENIED", "权限不足：只能编辑自己创建的题目");
                 }
             }
         }
@@ -113,13 +114,13 @@ public class QuestionServiceImpl implements QuestionService {
     public void deleteQuestion(Long id) {
         Question question = questionRepository.selectById(id);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         // 权限检查：管理员可以删除所有题目，教师只能删除自己创建的题目
         if (!SecurityUtil.isAdmin()) {
             if (!SecurityUtil.isTeacher()) {
-                throw new RuntimeException("权限不足：只有教师和管理员可以删除题目");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以删除题目");
             }
             
             // 检查是否是自己的题目
@@ -127,7 +128,7 @@ public class QuestionServiceImpl implements QuestionService {
             if (currentUsername != null) {
                 User currentUser = userRepository.findByUsername(currentUsername);
                 if (currentUser == null || !currentUser.getId().equals(question.getCreatedById())) {
-                    throw new RuntimeException("权限不足：只能删除自己创建的题目");
+                    throw new BusinessException("PERMISSION_DENIED", "权限不足：只能删除自己创建的题目");
                 }
             }
         }
@@ -139,12 +140,12 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionResponse getQuestionById(Long id) {
         // 权限检查：教师和管理员可以查看题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看题目");
         }
 
         Question question = questionRepository.selectById(id);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
         return QuestionResponse.fromEntity(question);
     }
@@ -154,7 +155,7 @@ public class QuestionServiceImpl implements QuestionService {
                                               Question.QuestionType type, Integer difficulty, String keyword) {
         // 权限检查：教师和管理员可以查看题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看题目");
         }
 
         Page<Question> pageParam = new Page<>(page, size);
@@ -179,7 +180,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> getQuestionsByCategory(Long categoryId) {
         // 权限检查：教师和管理员可以查看题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看题目");
         }
 
         List<Question> questions = questionRepository.selectList(null);
@@ -193,7 +194,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> getQuestionsByCreator(Long createdById) {
         // 权限检查：教师和管理员可以查看题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看题目");
         }
 
         List<Question> questions = questionRepository.findByCreatedById(createdById);
@@ -211,7 +212,7 @@ public class QuestionServiceImpl implements QuestionService {
         // 权限检查：管理员可以批量删除所有题目，教师只能批量删除自己的题目
         if (!SecurityUtil.isAdmin()) {
             if (!SecurityUtil.isTeacher()) {
-                throw new RuntimeException("权限不足：只有教师和管理员可以删除题目");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以删除题目");
             }
             
             // 检查是否都是自己的题目
@@ -222,7 +223,7 @@ public class QuestionServiceImpl implements QuestionService {
                     for (Long id : ids) {
                         Question question = questionRepository.selectById(id);
                         if (question != null && !currentUser.getId().equals(question.getCreatedById())) {
-                            throw new RuntimeException("权限不足：只能删除自己创建的题目");
+                            throw new BusinessException("PERMISSION_DENIED", "权限不足：只能删除自己创建的题目");
                         }
                     }
                 }
@@ -238,28 +239,16 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionResponse copyQuestion(Long id) {
         // 权限检查：只有教师和管理员可以复制题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以复制题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以复制题目");
         }
 
         Question originalQuestion = questionRepository.selectById(id);
         if (originalQuestion == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         // 获取当前用户信息
         String username = SecurityUtil.getCurrentUsername();
-        if (username == null) {
-            throw new RuntimeException("用户未认证");
-        }
-        
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
-        }
-
-        // 创建复制的题目
-        Question copiedQuestion = Question.builder()
-                .title(originalQuestion.getTitle() + " (复制)")
                 .content(originalQuestion.getContent())
                 .type(originalQuestion.getType())
                 .difficulty(originalQuestion.getDifficulty())
@@ -281,7 +270,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> getRandomQuestions(int count, Long categoryId, Question.QuestionType type, Integer difficulty) {
         // 权限检查：教师和管理员可以获取随机题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以获取随机题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以获取随机题目");
         }
 
         List<Question> questions = questionRepository.findRandomQuestions(count, categoryId, type, difficulty);
@@ -299,7 +288,7 @@ public class QuestionServiceImpl implements QuestionService {
         // 权限检查：管理员可以批量更新所有题目状态，教师只能更新自己的题目
         if (!SecurityUtil.isAdmin()) {
             if (!SecurityUtil.isTeacher()) {
-                throw new RuntimeException("权限不足：只有教师和管理员可以更新题目状态");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以更新题目状态");
             }
             
             // 检查是否都是自己的题目
@@ -310,7 +299,7 @@ public class QuestionServiceImpl implements QuestionService {
                     for (Long id : ids) {
                         Question question = questionRepository.selectById(id);
                         if (question != null && !currentUser.getId().equals(question.getCreatedById())) {
-                            throw new RuntimeException("权限不足：只能更新自己创建的题目");
+                            throw new BusinessException("PERMISSION_DENIED", "权限不足：只能更新自己创建的题目");
                         }
                     }
                 }
@@ -329,7 +318,7 @@ public class QuestionServiceImpl implements QuestionService {
         // 权限检查：管理员可以批量更新所有题目分类，教师只能更新自己的题目
         if (!SecurityUtil.isAdmin()) {
             if (!SecurityUtil.isTeacher()) {
-                throw new RuntimeException("权限不足：只有教师和管理员可以更新题目分类");
+                throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以更新题目分类");
             }
             
             // 检查是否都是自己的题目
@@ -340,7 +329,7 @@ public class QuestionServiceImpl implements QuestionService {
                     for (Long id : ids) {
                         Question question = questionRepository.selectById(id);
                         if (question != null && !currentUser.getId().equals(question.getCreatedById())) {
-                            throw new RuntimeException("权限不足：只能更新自己创建的题目");
+                            throw new BusinessException("PERMISSION_DENIED", "权限不足：只能更新自己创建的题目");
                         }
                     }
                 }
@@ -354,7 +343,7 @@ public class QuestionServiceImpl implements QuestionService {
     public Object getQuestionStatistics() {
         // 权限检查：教师和管理员可以查看统计信息
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看统计信息");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看统计信息");
         }
 
         // 这里需要根据实际的查询结果结构来处理
@@ -387,7 +376,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> getQuestionsByDifficultyDistribution(Long categoryId, int easy, int medium, int hard) {
         // 权限检查：教师和管理员可以按难度分布获取题目
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以按难度分布获取题目");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以按难度分布获取题目");
         }
 
         List<Question> questions = questionRepository.findQuestionsByDifficultyDistribution(categoryId, easy, medium, hard);
@@ -400,7 +389,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<String> getSearchSuggestions(String keyword) {
         // 权限检查：教师和管理员可以获取搜索建议
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以获取搜索建议");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以获取搜索建议");
         }
 
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -415,12 +404,12 @@ public class QuestionServiceImpl implements QuestionService {
         // 权限检查：所有认证用户都可以验证答案
         String username = SecurityUtil.getCurrentUsername();
         if (username == null) {
-            throw new RuntimeException("用户未认证");
+            throw new BusinessException("AUTHENTICATION_REQUIRED", "用户未认证");
         }
 
         Question question = questionRepository.selectById(id);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         if (userAnswer == null || userAnswer.trim().isEmpty()) {
@@ -467,12 +456,12 @@ public class QuestionServiceImpl implements QuestionService {
     public Object getQuestionUsageHistory(Long id) {
         // 权限检查：教师和管理员可以查看题目使用历史
         if (!SecurityUtil.isTeacherOrAdmin()) {
-            throw new RuntimeException("权限不足：只有教师和管理员可以查看题目使用历史");
+            throw new BusinessException("PERMISSION_DENIED", "权限不足：只有教师和管理员可以查看题目使用历史");
         }
 
         Question question = questionRepository.selectById(id);
         if (question == null) {
-            throw new RuntimeException("题目不存在");
+            throw new BusinessException("QUESTION_NOT_FOUND", "题目不存在");
         }
 
         // 模拟使用历史数据（实际项目中需要从考试记录表中查询）

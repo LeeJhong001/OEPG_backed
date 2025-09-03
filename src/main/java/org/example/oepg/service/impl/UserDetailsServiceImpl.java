@@ -1,6 +1,7 @@
 package org.example.oepg.service.impl;
 
 import org.example.oepg.entity.User;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

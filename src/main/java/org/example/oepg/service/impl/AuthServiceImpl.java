@@ -5,6 +5,7 @@ import org.example.oepg.dto.req.RegisterRequest;
 import org.example.oepg.dto.res.AuthResponse;
 import org.example.oepg.dto.res.UserInfoResponse;
 import org.example.oepg.entity.User;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.service.AuthService;
 import org.example.oepg.service.UserService;
 import org.example.oepg.util.JwtUtil;
@@ -57,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
             User user = userService.findByUsername(loginRequest.getUsername());
             if (user == null) {
                 log.error("用户验证成功但无法从数据库获取用户信息: {}", loginRequest.getUsername());
-                throw new RuntimeException("用户信息获取失败");
+                throw new BusinessException("USER_NOT_FOUND", "用户信息获取失败");
             }
             log.info("7. 用户信息获取成功: id={}, role={}, status={}", user.getId(), user.getRole(), user.getStatus());
             
@@ -73,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
             log.error("错误消息: {}", e.getMessage());
             
             // 重新抛出异常，让控制器处理
-            throw new RuntimeException("用户名或密码错误");
+            throw new BusinessException("AUTHENTICATION_FAILED", "用户名或密码错误");
         }
     }
 
@@ -100,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
             return AuthResponse.registerSuccess(token, userInfo);
         } catch (Exception e) {
             log.error("注册失败，详细错误信息: ", e);
-            throw new RuntimeException(e.getMessage());
+            throw new BusinessException("REGISTRATION_FAILED", e.getMessage());
         }
     }
 
@@ -111,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.findByUsername(username);
         if (user == null) {
             log.error("用户不存在: {}", username);
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("USER_NOT_FOUND", "用户不存在");
         }
         
         log.info("用户信息获取成功: id={}, role={}", user.getId(), user.getRole());

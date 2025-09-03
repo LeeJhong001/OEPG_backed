@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.oepg.dto.req.ExamRequest;
 import org.example.oepg.dto.res.ExamResponse;
 import org.example.oepg.entity.Exam;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.repository.ExamRepository;
 import org.example.oepg.service.ExamService;
 import org.springframework.beans.BeanUtils;
@@ -33,7 +34,7 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse createExam(ExamRequest request) {
         // 验证时间逻辑
         if (request.getEndTime().isBefore(request.getStartTime())) {
-            throw new RuntimeException("结束时间不能早于开始时间");
+            throw new BusinessException("INVALID_TIME_RANGE", "结束时间不能早于开始时间");
         }
 
         Exam exam = Exam.builder()
@@ -56,17 +57,17 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse updateExam(Long id, ExamRequest request) {
         Exam exam = examRepository.selectById(id);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         // 验证权限：只有创建者可以修改
         if (!exam.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限修改此考试");
+            throw new BusinessException("PERMISSION_DENIED", "无权限修改此考试");
         }
 
         // 验证时间逻辑
         if (request.getEndTime().isBefore(request.getStartTime())) {
-            throw new RuntimeException("结束时间不能早于开始时间");
+            throw new BusinessException("INVALID_TIME_RANGE", "结束时间不能早于开始时间");
         }
 
         exam.setTitle(request.getTitle());
@@ -86,18 +87,18 @@ public class ExamServiceImpl implements ExamService {
     public void deleteExam(Long id) {
         Exam exam = examRepository.selectById(id);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         // 验证权限：只有创建者可以删除
         if (!exam.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限删除此考试");
+            throw new BusinessException("PERMISSION_DENIED", "无权限删除此考试");
         }
 
         // 检查考试状态，已发布的考试不能删除
         if (exam.getStatus() == Exam.ExamStatus.PUBLISHED || 
             exam.getStatus() == Exam.ExamStatus.ONGOING) {
-            throw new RuntimeException("已发布或进行中的考试不能删除");
+            throw new BusinessException("EXAM_CANNOT_DELETE", "已发布或进行中的考试不能删除");
         }
 
         examRepository.deleteById(id);
@@ -107,7 +108,7 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse getExamById(Long id) {
         Exam exam = examRepository.selectById(id);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
         return convertToResponse(exam);
     }
@@ -160,22 +161,22 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse publishExam(Long id) {
         Exam exam = examRepository.selectById(id);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         // 验证权限
         if (!exam.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限发布此考试");
+            throw new BusinessException("PERMISSION_DENIED", "无权限发布此考试");
         }
 
         // 验证考试状态
         if (exam.getStatus() != Exam.ExamStatus.DRAFT) {
-            throw new RuntimeException("只有草稿状态的考试可以发布");
+            throw new BusinessException("INVALID_EXAM_STATUS", "只有草稿状态的考试可以发布");
         }
 
         // 验证考试时间
         if (exam.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("考试开始时间不能早于当前时间");
+            throw new BusinessException("INVALID_START_TIME", "考试开始时间不能早于当前时间");
         }
 
         exam.setStatus(Exam.ExamStatus.PUBLISHED);
@@ -187,12 +188,12 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse archiveExam(Long id) {
         Exam exam = examRepository.selectById(id);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         // 验证权限
         if (!exam.getCreatedById().equals(getCurrentUserId())) {
-            throw new RuntimeException("无权限归档此考试");
+            throw new BusinessException("PERMISSION_DENIED", "无权限归档此考试");
         }
 
         exam.setStatus(Exam.ExamStatus.ARCHIVED);
@@ -220,7 +221,7 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse copyExam(Long id) {
         Exam originalExam = examRepository.selectById(id);
         if (originalExam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         Exam newExam = Exam.builder()
@@ -250,7 +251,7 @@ public class ExamServiceImpl implements ExamService {
     public Object getExamStatistics(Long examId) {
         Exam exam = examRepository.selectById(examId);
         if (exam == null) {
-            throw new RuntimeException("考试不存在");
+            throw new BusinessException("EXAM_NOT_FOUND", "考试不存在");
         }
 
         Map<String, Object> statistics = new HashMap<>();

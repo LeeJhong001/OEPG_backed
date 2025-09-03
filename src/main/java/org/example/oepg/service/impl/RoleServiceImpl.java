@@ -3,6 +3,7 @@ package org.example.oepg.service.impl;
 import org.example.oepg.dto.res.RoleInfo;
 import org.example.oepg.dto.res.RolePermissions;
 import org.example.oepg.enums.UserRole;
+import org.example.oepg.exception.BusinessException;
 import org.example.oepg.service.RoleService;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class RoleServiceImpl implements RoleService {
             UserRole role = UserRole.fromCode(code);
             return new RoleInfo(role.getCode(), role.getDisplayName(), role.name());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("无效的角色代码: " + code);
+            throw new BusinessException("INVALID_ROLE_CODE", "无效的角色代码: " + code);
         }
     }
 
@@ -47,7 +48,7 @@ public class RoleServiceImpl implements RoleService {
                     role.hasAdminPermission()
             );
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("无效的角色代码: " + code);
+            throw new BusinessException("INVALID_ROLE_CODE", "无效的角色代码: " + code);
         }
     }
 } 
