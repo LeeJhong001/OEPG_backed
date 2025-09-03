@@ -36,6 +36,9 @@ public class PaperQuestion {
     @TableField("section")
     private String section; // 题目所属章节或分类
 
+    @TableField("sort_order")
+    private Integer sortOrder; // 题目排序
+
     @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 } 

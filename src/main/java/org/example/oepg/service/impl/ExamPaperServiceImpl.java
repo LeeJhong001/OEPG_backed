@@ -426,8 +426,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
             queryWrapper.eq("difficulty", rule.getDifficulty());
         }
         
-        queryWrapper.orderByFunc(true, "RAND()"); // 随机排序
-        queryWrapper.last("LIMIT " + rule.getCount());
+        queryWrapper.last("ORDER BY RAND() LIMIT " + rule.getCount()); // 随机排序并限制数量
         
         return questionRepository.selectList(queryWrapper);
     }

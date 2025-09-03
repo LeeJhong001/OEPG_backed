@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -237,14 +238,14 @@ public class TeacherCategoryController {
         try {
             // TODO: 实现分类统计逻辑
             // 统计该分类下的题目数量、难度分布等
-            return ResponseEntity.ok(Map.of(
-                "categoryId", id,
-                "totalQuestions", 0,
-                "easyQuestions", 0,
-                "mediumQuestions", 0,
-                "hardQuestions", 0,
-                "questionTypes", Map.of()
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("categoryId", id);
+            response.put("totalQuestions", 0);
+            response.put("easyQuestions", 0);
+            response.put("mediumQuestions", 0);
+            response.put("hardQuestions", 0);
+            response.put("questionTypes", new HashMap<>());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

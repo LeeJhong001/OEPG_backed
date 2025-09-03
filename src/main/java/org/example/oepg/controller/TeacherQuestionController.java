@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -187,7 +189,7 @@ public class TeacherQuestionController {
                     QuestionRequest request = new QuestionRequest();
                     request.setTitle(question.getTitle());
                     request.setContent(question.getContent());
-                    request.setType(Question.QuestionType.valueOf(question.getType()));
+                    request.setType(question.getType());
                     request.setDifficulty(difficulty);
                     request.setCategoryId(question.getCategoryId());
                     request.setAnswer(question.getAnswer());
@@ -311,12 +313,11 @@ public class TeacherQuestionController {
                 }
             }
 
-            Map<String, Object> result = Map.of(
-                "total", questions.size(),
-                "success", successCount,
-                "failed", failCount,
-                "errors", errors
-            );
+            Map<String, Object> result = new HashMap<>();
+            result.put("total", questions.size());
+            result.put("success", successCount);
+            result.put("failed", failCount);
+            result.put("errors", errors);
 
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -360,7 +361,7 @@ public class TeacherQuestionController {
     public ResponseEntity<List<QuestionResponse>> getFavoriteQuestions() {
         try {
             // TODO: 实现获取收藏题目功能
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(new ArrayList<>());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -387,7 +388,7 @@ public class TeacherQuestionController {
     public ResponseEntity<List<QuestionResponse>> getQuestionsByTag(@PathVariable String tag) {
         try {
             // TODO: 实现根据标签获取题目功能
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(new ArrayList<>());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
