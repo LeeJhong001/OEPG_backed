@@ -65,7 +65,7 @@ OEPG 是一个基于 Spring Boot 的在线考试平台后端服务，提供完�
    mvn spring-boot:run
    ```
 
-   或者直接运行主类：`org.example.oepg.OEPGApplication`
+   或者直接运行主类：`org.example.oepg.OnlineExamPaperGeneratorApplication`
 
 6. **验证启动**
    
@@ -110,34 +110,88 @@ PUT    /api/questions/{id}    # 更新题目
 DELETE /api/questions/{id}    # 删除题目
 ```
 
-### 题目分类
+### 教师端题目管理
 ```
-GET    /api/categories        # 获取分类列表
-POST   /api/categories        # 创建分类
-PUT    /api/categories/{id}   # 更新分类
-DELETE /api/categories/{id}   # 删除分类
+GET    /api/teacher/questions                    # 获取题目列表
+POST   /api/teacher/questions                    # 创建题目
+GET    /api/teacher/questions/{id}              # 获取题目详情
+PUT    /api/teacher/questions/{id}              # 更新题目
+DELETE /api/teacher/questions/{id}              # 删除题目
+PUT    /api/teacher/questions/batch/difficulty  # 批量更新题目难度
+POST   /api/teacher/questions/import            # 批量导入题目
+GET    /api/teacher/questions/export            # 导出题目
+GET    /api/teacher/questions/favorites         # 获取收藏题目
+GET    /api/teacher/questions/tags/{tag}        # 根据标签获取题目
 ```
 
-### 用户管理
+### 题目分类管理
 ```
-GET    /api/users            # 获取用户列表
-POST   /api/users            # 创建用户
-GET    /api/users/{id}       # 获取用户详情
-PUT    /api/users/{id}       # 更新用户
-DELETE /api/users/{id}       # 删除用户
+GET    /api/question-categories        # 获取分类列表
+POST   /api/question-categories        # 创建分类
+GET    /api/question-categories/{id}   # 获取分类详情
+PUT    /api/question-categories/{id}   # 更新分类
+DELETE /api/question-categories/{id}   # 删除分类
+```
+
+### 教师端分类管理
+```
+GET    /api/teacher/categories                   # 获取分类列表
+POST   /api/teacher/categories                   # 创建分类
+GET    /api/teacher/categories/{id}             # 获取分类详情
+PUT    /api/teacher/categories/{id}             # 更新分类
+DELETE /api/teacher/categories/{id}             # 删除分类
+GET    /api/teacher/categories/{id}/statistics  # 获取分类统计信息
+GET    /api/teacher/categories/search           # 搜索分类
+```
+
+### 考试管理
+```
+GET    /api/teacher/exams         # 获取考试列表
+POST   /api/teacher/exams         # 创建考试
+GET    /api/teacher/exams/{id}    # 获取考试详情
+PUT    /api/teacher/exams/{id}    # 更新考试
+DELETE /api/teacher/exams/{id}    # 删除考试
+```
+
+### 试卷管理
+```
+GET    /api/exam-papers         # 获取试卷列表
+POST   /api/exam-papers         # 创建试卷
+GET    /api/exam-papers/{id}    # 获取试卷详情
+PUT    /api/exam-papers/{id}    # 更新试卷
+DELETE /api/exam-papers/{id}    # 删除试卷
+```
+
+### 用户管理 (管理员)
+```
+GET    /api/admin/users            # 获取用户列表
+POST   /api/admin/users            # 创建用户
+GET    /api/admin/users/{id}       # 获取用户详情
+PUT    /api/admin/users/{id}       # 更新用户
+DELETE /api/admin/users/{id}       # 删除用户
+```
+
+### 角色管理
+```
+GET    /api/roles         # 获取角色列表
+POST   /api/roles         # 创建角色
+GET    /api/roles/{id}    # 获取角色详情
+PUT    /api/roles/{id}    # 更新角色
+DELETE /api/roles/{id}    # 删除角色
 ```
 
 ## 🗄️ 数据库设计
 
 ### 主要数据表
-- `user` - 用户信息表
-- `question` - 题目信息表
-- `question_category` - 题目分类表
-- `exam` - 考试信息表
-- `exam_paper` - 试卷表
-- `exam_record` - 考试记录表
-- `paper_question` - 试卷题目关联表
-- `subject` - 科目表
+- `users` - 用户信息表
+- `questions` - 题目信息表
+- `question_categories` - 题目分类表
+- `exams` - 考试信息表
+- `exam_papers` - 试卷表
+- `exam_records` - 考试记录表
+- `paper_questions` - 试卷题目关联表
+- `subjects` - 科目表
+- `roles` - 角色表
 
 ## 🔧 开发指南
 
@@ -224,8 +278,8 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 ## 📞 联系方式
 
-- 项目维护者: [Your Name]
-- 邮箱: [your.email@example.com]
+- 项目维护者: CodeJzi
+- 微信: CodeJzi
 - 项目地址: [repository-url]
 
 ## ⭐ 致谢
