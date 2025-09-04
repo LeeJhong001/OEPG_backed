@@ -102,7 +102,11 @@ public class QuestionServiceImpl implements QuestionService {
         question.setCategoryId(request.getCategoryId());
         question.setAnswer(request.getAnswer());
         question.setAnalysis(request.getAnalysis());
-        question.setOptions(request.getOptions());
+        
+        // 处理选项字段 - 如果是JSON格式，提取content字段；否则直接使用
+        String processedOptions = processOptionsField(request.getOptions());
+        question.setOptions(processedOptions);
+        
         question.setScore(request.getScore());
         question.setUpdatedAt(LocalDateTime.now());
 
@@ -249,6 +253,10 @@ public class QuestionServiceImpl implements QuestionService {
 
         // 获取当前用户信息
         String username = SecurityUtil.getCurrentUsername();
+        User user = userRepository.findByUsername(username);
+        
+        // 创建复制的题目
+        Question copiedQuestion = Question.builder()
                 .content(originalQuestion.getContent())
                 .type(originalQuestion.getType())
                 .difficulty(originalQuestion.getDifficulty())
@@ -478,5 +486,42 @@ public class QuestionServiceImpl implements QuestionService {
 
         response.calculateAccuracyRate();
         return response;
+    }
+
+    /**
+     * 处理选项字段 - 如果是JSON格式，提取content字段；否则直接使用
+     */
+    private String processOptionsField(String options) {
+        if (options == null || options.trim().isEmpty()) {
+            return options;
+        }
+        
+        try {
+            // 尝试解析为JSON数组
+            if (options.trim().startsWith("[") && options.trim().endsWith("]")) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.JsonNode jsonArray = mapper.readTree(options);
+                
+                if (jsonArray.isArray()) {
+                    StringBuilder result = new StringBuilder("[");
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        if (i > 0) result.append(", ");
+                        com.fasterxml.jackson.databind.JsonNode item = jsonArray.get(i);
+                        
+                        // 提取content字段
+                        if (item.has("content")) {
+                            String content = item.get("content").asText();
+                            result.append("\"").append(content).append("\"");
+                        }
+                    }
+                    result.append("]");
+                    return result.toString();
+                }
+            }
+        } catch (Exception e) {
+            // 如果解析失败，直接返回原始字符串
+        }
+        
+        return options;
     }
 } 
