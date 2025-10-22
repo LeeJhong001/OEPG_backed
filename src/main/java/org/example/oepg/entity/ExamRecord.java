@@ -48,6 +48,9 @@ public class ExamRecord {
     @TableField("status")
     private RecordStatus status;
 
+    @TableField("answers")
+    private String answers; // 学生答案（JSON字符串）
+
     @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
@@ -57,4 +60,4 @@ public class ExamRecord {
     public enum RecordStatus {
         ONGOING, SUBMITTED, GRADED, TIMEOUT
     }
-} 
+}

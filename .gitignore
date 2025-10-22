@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# === Project Specific ===
+# Do not commit local database initialization script (closed source)
+database_safe_init.sql
