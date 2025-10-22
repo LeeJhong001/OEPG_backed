@@ -24,8 +24,17 @@ public class Subject {
     @TableField("name")
     private String name;
 
+    @TableField("code")
+    private String code;
+
     @TableField("description")
     private String description;
+
+    @TableField("department")
+    private String department;
+
+    @TableField("credits")
+    private Integer credits;
 
     @TableField("enabled")
     private Boolean enabled = true;
