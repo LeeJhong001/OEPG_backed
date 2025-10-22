@@ -27,4 +27,21 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     public Subject getSubjectById(Long id) {
         return getById(id);
     }
+    
+    @Override
+    public Subject save(Subject subject) {
+        super.save(subject);
+        return subject;
+    }
+    
+    @Override
+    public Subject updateById(Subject subject) {
+        super.updateById(subject);
+        return subject;
+    }
+    
+    @Override
+    public boolean removeById(Long id) {
+        return super.removeById(id);
+    }
 }

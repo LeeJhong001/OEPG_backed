@@ -19,4 +19,19 @@ public interface SubjectService extends IService<Subject> {
      * 根据ID获取科目
      */
     Subject getSubjectById(Long id);
+    
+    /**
+     * 保存科目
+     */
+    Subject save(Subject subject);
+    
+    /**
+     * 更新科目
+     */
+    Subject updateById(Subject subject);
+    
+    /**
+     * 删除科目
+     */
+    boolean removeById(Long id);
 }
